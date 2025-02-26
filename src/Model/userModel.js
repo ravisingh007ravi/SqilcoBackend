@@ -5,7 +5,11 @@ const userSchema = new mongoose.Schema({
     name: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, trim: true },
     password: { type: String, required: true, trim: true },
-    isdelet:{type: Boolean, default: false},
+    UserVerifyOtp: { type: String, required: true, trim: true },
+    role:{type: String, enum: ['user', 'admin'], required: true, trim: true },
+    isdelete:{type: Boolean, default: false},
+    isVerify:{type: Boolean, default: false},
+    isAccountActive:{type: Boolean, default: true},
 },
 {timestamps: true}
 );
