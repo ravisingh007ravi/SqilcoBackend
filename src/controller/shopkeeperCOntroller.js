@@ -5,7 +5,7 @@ const { verifyOtp } = require('../Mail/AllMailFormate')
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-exports.createUSer = async (req, res) => {
+exports.createShopkeeper = async (req, res) => {
     try {
 
         const data = req.body;
@@ -32,7 +32,7 @@ exports.createUSer = async (req, res) => {
 
         const bcryptPassword = await bcrypt.hash(password, 10);
         data.password = bcryptPassword
-        data.role = 'user';
+        data.role = 'shopkeeper';
         data.UserVerifyOtp = randomOTP;
 
         const tempData = { name: data.name, email: data.email }
@@ -46,36 +46,9 @@ exports.createUSer = async (req, res) => {
 }
 
 
-exports.VerifyUserOtp = async (req, res) => {
-    try {
-
-        const data = req.body;
-        const id = req.params.userId;
 
 
-        if (!data.otp) return res.status(400).send({ status: false, msg: "provide otp" })
-
-        const chekMail = await userModel.findById({ _id: id })
-
-        if (chekMail) {
-            if (!chekMail.isAccountActive) return res.status(400).send({ status: false, msg: "Your Account is Blocked" });
-            if (chekMail.isdelete) return res.status(400).send({ status: false, msg: "Your Account is Deleted" });
-            if (chekMail.isVerify) return res.status(400).send({ status: false, msg: "Your Account is Already Verify pls LogIn" });
-        }
-
-        if (!(data.otp == chekMail.UserVerifyOtp)) return res.status(400).send({ status: false, msg: "Wrong Otp" })
-
-        await userModel.findByIdAndUpdate({ _id: id }, { $set: { isVerify: true } });
-        res.status(200).send({ status: true, msg: "User Verify successfully" });
-
-    }
-    catch (e) { res.status(500).send({ status: false, msg: e.message }) }
-
-}
-
-
-
-exports.LogInUser = async (req, res) => {
+exports.LogInShopkeeper = async (req, res) => {
     try {
 
         const chekMail = await userModel.findOne({ email: req.body.email });
@@ -92,7 +65,7 @@ exports.LogInUser = async (req, res) => {
 
         if (!compareBcrypt) return res.status(400).send({ status: false, msg: "Wrong Password" })
        
-            const token = jwt.sign({ userId: chekMail._id }, process.env.UserJWTToken, { expiresIn: '1d' });
+            const token = jwt.sign({ userId: chekMail._id }, process.env.ShopkeeperJWTToken, { expiresIn: '1d' });
             res.status(200).send({ status: true, msg: "User LogIn successfully", token: token, id: chekMail._id });
     }
     catch (e) { res.status(500).send({ status: false, msg: e.message }) }
