@@ -17,12 +17,15 @@ exports.createUSer = async (req, res) => {
         const chekMail = await userModel.findOneAndUpdate({ email: email }, { $set: { UserVerifyOtp: randomOTP } }, { new: true })
 
         if (chekMail) {
-            if (!chekMail.isAccountActive) return res.status(400).send({ status: false, msg: "Your Account is Blocked" });
-            if (chekMail.isdelete) return res.status(400).send({ status: false, msg: "Your Account is Deleted" });
-            if (chekMail.isVerify) return res.status(400).send({ status: false, msg: "Your Account is Already Verify pls LogIn" });
+            const UserStatus = { isAccountActive: chekMail.isAccountActive, isVerify: chekMail.isVerify, isdelete: chekMail.isdelete }
+            if (!chekMail.isAccountActive) return res.status(400).send({ status: false, msg: "Your Account is Blocked", data: UserStatus });
+            if (chekMail.isdelete) return res.status(400).send({ status: false, msg: "Your Account is Deleted", data: UserStatus });
+            if (chekMail.isVerify) return res.status(400).send({ status: false, msg: "Your Account is Already Verify pls LogIn", data: UserStatus });
 
             verifyOtp(name, email, randomOTP)
-            return res.status(200).send({ status: true, msg: "OTP sent successfully", id: chekMail._id });
+            return res.status(200).send({
+                status: true, msg: "OTP sent successfully", id: chekMail._id
+            });
         }
 
         if (img) {
@@ -91,9 +94,9 @@ exports.LogInUser = async (req, res) => {
         const compareBcrypt = await bcrypt.compare(req.body.password, chekMail.password)
 
         if (!compareBcrypt) return res.status(400).send({ status: false, msg: "Wrong Password" })
-       
-            const token = jwt.sign({ userId: chekMail._id }, process.env.UserJWTToken, { expiresIn: '1d' });
-            res.status(200).send({ status: true, msg: "User LogIn successfully", token: token, id: chekMail._id });
+
+        const token = jwt.sign({ userId: chekMail._id }, process.env.UserJWTToken, { expiresIn: '1d' });
+        res.status(200).send({ status: true, msg: "User LogIn successfully", token: token, id: chekMail._id });
     }
     catch (e) { res.status(500).send({ status: false, msg: e.message }) }
 
