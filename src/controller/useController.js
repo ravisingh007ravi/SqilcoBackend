@@ -23,9 +23,7 @@ exports.createUSer = async (req, res) => {
             if (chekMail.isVerify) return res.status(400).send({ status: false, msg: "Your Account is Already Verify pls LogIn", data: UserStatus });
 
             verifyOtp(name, email, randomOTP)
-            return res.status(200).send({
-                status: true, msg: "OTP sent successfully", id: chekMail._id
-            });
+            return res.status(200).send({ status: true, msg: "OTP sent successfully", id: chekMail._id});
         }
 
         if (img) {
