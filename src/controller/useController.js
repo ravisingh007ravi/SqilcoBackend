@@ -10,7 +10,6 @@ exports.createUSer = async (req, res) => {
 
         const data = req.body;
         const img = req.file;
-
         const { name, email, password } = data;
         const randomOTP = Math.floor(1000 + Math.random() * 9000);
 
@@ -22,7 +21,7 @@ exports.createUSer = async (req, res) => {
             if (chekMail.isdelete) return res.status(400).send({ status: false, msg: "Your Account is Deleted", data: UserStatus });
             if (chekMail.isVerify) return res.status(400).send({ status: false, msg: "Your Account is Already Verify pls LogIn", data: UserStatus });
 
-            verifyOtp(name, email, randomOTP)
+            // verifyOtp(name, email, randomOTP)
             return res.status(200).send({ status: true, msg: "OTP sent successfully", id: chekMail._id, email: chekMail.email });
         }
 
@@ -37,7 +36,7 @@ exports.createUSer = async (req, res) => {
         data.UserVerifyOtp = randomOTP;
 
 
-        verifyOtp(name, email, randomOTP)
+        // verifyOtp(name, email, randomOTP)
         const USerDAta = await userModel.create(data)
         res.status(201).send({ status: true, msg: 'Successfully Register', id: USerDAta._id, email: data.email });
     }
