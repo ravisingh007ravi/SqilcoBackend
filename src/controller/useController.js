@@ -39,7 +39,7 @@ exports.createUSer = async (req, res) => {
 
         verifyOtp(name, email, randomOTP)
         const USerDAta = await userModel.create(data)
-        res.status(201).send({ status: true, msg: 'Successfully Register', id: USerDAta._id, email: data.email })
+        res.status(201).send({ status: true, msg: 'Successfully Register', id: USerDAta._id, email: data.email });
     }
     catch (e) { res.status(500).send({ status: false, msg: e.message }) }
 
@@ -96,7 +96,7 @@ exports.LogInUser = async (req, res) => {
         if (!compareBcrypt) return res.status(400).send({ status: false, msg: "Wrong Password" })
 
         const token = jwt.sign({ userId: chekMail._id }, process.env.UserJWTToken, { expiresIn: '1d' });
-        res.status(200).send({ status: true, msg: "User LogIn successfully", token: token, id: chekMail._id });
+        res.status(200).send({ status: true, msg: "User LogIn successfully", token: token, id: chekMail._id, profileImage: chekMail.userImg });
     }
     catch (e) { res.status(500).send({ status: false, msg: e.message }) }
 
@@ -126,7 +126,7 @@ exports.LogInAdmin = async (req, res) => {
     try {
 
         const email = req.body.email
-        
+
         const randomOtp = Math.floor(1000 + Math.random() * 9000);
         const chekMail = await userModel.findOneAndUpdate({ email: email, role: 'admin' }, { $set: { AdminOtp: randomOtp } });
 
