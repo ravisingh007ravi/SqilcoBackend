@@ -118,6 +118,17 @@ exports.ResendUSerOTP = async (req, res) => {
 }
 
 
+exports.Test = async (req, res) => {
+    try {
+
+       const data = await userModel.find()
+
+        res.send({ status: true, msg: "OTP sent successfully" ,data:data})
+    }
+    catch (e) { res.status(500).send({ status: false, msg: e.message }) }
+
+}
+
 
 
 

@@ -1,7 +1,7 @@
 const express = require('express')
 const multer = require('multer');
 // User Controller
-const { createUSer, VerifyUserOtp, LogInUser, ResendUSerOTP, LogInAdmin } = require('../controller/useController');
+const { createUSer, VerifyUserOtp, LogInUser, ResendUSerOTP, LogInAdmin, Test } = require('../controller/useController');
 // ShopKeeper Controller
 const {createShopkeeper,LogInShopkeeper} = require('../controller/shopkeeperCOntroller')
 // User Middleware
@@ -20,6 +20,8 @@ router.post('/createUSer', upload.single('userImg'), userAuthValidation, createU
 router.post('/VerifyUserOtp/:userId', VerifyUserOtp);
 router.post('/LogInUser', LogInAuthValidation, LogInUser);
 router.get('/ResendUSerOTP/:userId', ResendUSerOTP);
+
+router.get('/Test', Test);
 
 //Admin API's
 router.post('/LogInAdmin', LogInAuthValidation, LogInAdmin);
