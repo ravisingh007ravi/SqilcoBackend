@@ -1,9 +1,12 @@
 const express = require('express')
 const multer = require('multer');
-const { createUSer, VerifyUserOtp, LogInUser } = require('../controller/useController');
+// User Controller
+const { createUSer, VerifyUserOtp, LogInUser, ResendUSerOTP, LogInAdmin } = require('../controller/useController');
+// ShopKeeper Controller
+const {createShopkeeper,LogInShopkeeper} = require('../controller/shopkeeperCOntroller')
+// User Middleware
 const { userAuthValidation } = require('../Middleware/AllAuthUser');
 const { LogInAuthValidation } = require('../Middleware/AllAuthUser');
-const {createShopkeeper,LogInShopkeeper} = require('../controller/shopkeeperCOntroller')
 
 const upload = multer({ storage: multer.diskStorage({}) });
 
@@ -16,6 +19,10 @@ const router = express.Router();
 router.post('/createUSer', upload.single('userImg'), userAuthValidation, createUSer);
 router.post('/VerifyUserOtp/:userId', VerifyUserOtp);
 router.post('/LogInUser', LogInAuthValidation, LogInUser);
+router.get('/ResendUSerOTP/:userId', ResendUSerOTP);
+
+//Admin API's
+router.post('/LogInAdmin', LogInAuthValidation, LogInAdmin);
 
 //Shopkeeper API's
 router.post('/createShopkeeper', upload.single('userImg'), userAuthValidation, createShopkeeper);
