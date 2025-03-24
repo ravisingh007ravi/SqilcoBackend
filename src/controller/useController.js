@@ -21,7 +21,7 @@ exports.createUSer = async (req, res) => {
             if (chekMail.isdelete) return res.status(400).send({ status: false, msg: "Your Account is Deleted", data: UserStatus });
             if (chekMail.isVerify) return res.status(400).send({ status: false, msg: "Your Account is Already Verify pls LogIn", data: UserStatus });
 
-            // verifyOtp(name, email, randomOTP)
+            verifyOtp(name, email, randomOTP)
             return res.status(200).send({ status: true, msg: "OTP sent successfully", id: chekMail._id, email: chekMail.email });
         }
 
@@ -36,7 +36,7 @@ exports.createUSer = async (req, res) => {
         data.UserVerifyOtp = randomOTP;
 
 
-        // verifyOtp(name, email, randomOTP)
+        verifyOtp(name, email, randomOTP)
         const USerDAta = await userModel.create(data)
         res.status(201).send({ status: true, msg: 'Successfully Register', id: USerDAta._id, email: data.email });
     }
@@ -76,30 +76,44 @@ exports.VerifyUserOtp = async (req, res) => {
 
 exports.LogInUser = async (req, res) => {
     try {
-
-        const chekMail = await userModel.findOne({ email: req.body.email });
-
-        if (chekMail) {
-            const { isAccountActive, isdelete, isVerify, _id } = chekMail
-            const temp = { isAccountActive, isdelete, isVerify, _id }
-            if (!chekMail.isAccountActive) return res.status(400).send({ status: false, msg: "Your Account is Blocked", data: temp });
-            if (chekMail.isdelete) return res.status(400).send({ status: false, msg: "Your Account is Deleted", data: temp });
-            if (!chekMail.isVerify) return res.status(400).send({ status: false, msg: "pls Verify Otp", data: temp });
-        }
-
-        if (!chekMail) {
-            return res.status(404).send({ status: false, msg: "User Not Found" })
-        }
-        const compareBcrypt = await bcrypt.compare(req.body.password, chekMail.password)
-
-        if (!compareBcrypt) return res.status(400).send({ status: false, msg: "Wrong Password" })
-
-        const token = jwt.sign({ userId: chekMail._id }, process.env.UserJWTToken, { expiresIn: '1d' });
-        res.status(200).send({ status: true, msg: "User LogIn successfully", token: token, id: chekMail._id, profileImage: chekMail.userImg });
+      const user = await userModel.findOne({ email: req.body.email });
+  
+      if (!user) {
+        return res.status(404).json({ status: false, msg: "User Not Found" });
+      }
+  
+      const { isAccountActive, isdelete, isVerify, _id, password, userImg } = user;
+  
+      if (!isAccountActive) {
+        return res.status(400).json({ status: false, msg: "Your Account is Blocked", data: { isAccountActive, isdelete, isVerify, _id } });
+      }
+      if (isdelete) {
+        return res.status(400).json({ status: false, msg: "Your Account is Deleted", data: { isAccountActive, isdelete, isVerify, _id } });
+      }
+      if (!isVerify) {
+        return res.status(400).json({ status: false, msg: "Please Verify OTP", data: { isAccountActive, isdelete, isVerify, _id } });
+      }
+  
+      const isPasswordCorrect = await bcrypt.compare(req.body.password, password);
+      if (!isPasswordCorrect) {
+        return res.status(400).json({ status: false, msg: "Wrong Password" });
+      }
+  
+      const token = jwt.sign({ userId: _id }, process.env.UserJWTToken, { expiresIn: "1d" });
+  
+      return res.status(200).json({
+        status: true,
+        msg: "User Logged In Successfully",
+        token,
+        id: _id,
+        profileImage: userImg
+      });
+  
+    } catch (error) {
+      res.status(500).json({ status: false, msg: error.message });
     }
-    catch (e) { res.status(500).send({ status: false, msg: e.message }) }
-
-}
+  };
+  
 
 
 exports.ResendUSerOTP = async (req, res) => {
