@@ -82,7 +82,7 @@ exports.LogInUser = async (req, res) => {
         return res.status(404).json({ status: false, msg: "User Not Found" });
       }
   
-      const { isAccountActive, isdelete, isVerify, _id, password, userImg } = user;
+      const { isAccountActive, isdelete, isVerify, _id, password, userImg,name, email,role } = user;
   
       if (!isAccountActive) {
         return res.status(400).json({ status: false, msg: "Your Account is Blocked", data: { isAccountActive, isdelete, isVerify, _id } });
@@ -106,7 +106,10 @@ exports.LogInUser = async (req, res) => {
         msg: "User Logged In Successfully",
         token,
         id: _id,
-        profileImage: userImg
+        profileImage: userImg,
+        name,
+        email,
+        role
       });
   
     } catch (error) {
