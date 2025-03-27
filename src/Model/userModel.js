@@ -12,6 +12,7 @@ const userSchema = new mongoose.Schema({
     isVerify:{type: Boolean, default: false},
     isVerifyAdmin:{type: Boolean, default: false},
     isAccountActive:{type: Boolean, default: true},
+    socialMedia:{type:Object,required:false},
 },
 {timestamps: true}
 );

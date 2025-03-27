@@ -145,6 +145,17 @@ exports.Test = async (req, res) => {
 
 }
 
+exports.UserUpdated = async (req, res) => {
+    try {
+      let data = req.body;
+
+      
+       res.send('updated')
+    }
+    catch (e) { res.status(500).send({ status: false, msg: e.message }) }
+
+}
+
 
 
 

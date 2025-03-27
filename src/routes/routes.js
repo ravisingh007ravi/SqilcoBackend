@@ -1,12 +1,13 @@
 const express = require('express')
 const multer = require('multer');
 // User Controller
-const { createUSer, VerifyUserOtp, LogInUser, ResendUSerOTP, LogInAdmin, Test } = require('../controller/useController');
+const { createUSer, VerifyUserOtp, LogInUser, ResendUSerOTP, LogInAdmin, 
+    Test,UserUpdated } = require('../controller/useController');
 // ShopKeeper Controller
-const {createShopkeeper,LogInShopkeeper} = require('../controller/shopkeeperCOntroller')
+const { createShopkeeper, LogInShopkeeper } = require('../controller/shopkeeperCOntroller')
 // User Middleware
-const { userAuthValidation } = require('../Middleware/AllAuthUser');
-const { LogInAuthValidation } = require('../Middleware/AllAuthUser');
+const { userAuthValidation, LogInAuthValidation } = require('../Middleware/AllAuthUser');
+const { authenticate, authorize } = require('../Middleware/AuthUser');
 
 const upload = multer({ storage: multer.diskStorage({}) });
 
@@ -20,8 +21,9 @@ router.post('/createUSer', upload.single('userImg'), userAuthValidation, createU
 router.post('/VerifyUserOtp/:userId', VerifyUserOtp);
 router.post('/LogInUser', LogInAuthValidation, LogInUser);
 router.get('/ResendUSerOTP/:userId', ResendUSerOTP);
+router.put('/UserUpdated/:userId', authenticate, authorize, UserUpdated);
 
-router.get('/Test', Test);
+router.get('/getAllData',authenticate, Test);
 
 //Admin API's
 router.post('/LogInAdmin', LogInAuthValidation, LogInAdmin);
