@@ -2,7 +2,7 @@ const express = require('express')
 const multer = require('multer');
 // User Controller
 const { createUSer, VerifyUserOtp, LogInUser, ResendUSerOTP, LogInAdmin, 
-    Test,UserUpdated } = require('../controller/useController');
+    Test,UserUpdated,updateUserEmail } = require('../controller/useController');
 // ShopKeeper Controller
 const { createShopkeeper, LogInShopkeeper } = require('../controller/shopkeeperCOntroller')
 // User Middleware
@@ -22,6 +22,7 @@ router.post('/VerifyUserOtp/:userId', VerifyUserOtp);
 router.post('/LogInUser', LogInAuthValidation, LogInUser);
 router.get('/ResendUSerOTP/:userId', ResendUSerOTP);
 router.put('/UserUpdated/:userId', authenticate, authorize, UserUpdated);
+router.put('/updateUserEmail/:userId', authenticate, authorize, updateUserEmail);
 
 router.get('/getAllData',authenticate, Test);
 
