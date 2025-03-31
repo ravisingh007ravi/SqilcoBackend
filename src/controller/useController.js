@@ -1,7 +1,7 @@
 const userModel = require('../Model/userModel')
 const bcrypt = require('bcrypt')
 const { userImageURL } = require('../Image/ImageURL')
-const { verifyOtp } = require('../Mail/AllMailFormate')
+const { verifyOtp, ChangeUserEmail } = require('../Mail/AllMailFormate')
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
@@ -134,16 +134,6 @@ exports.ResendUSerOTP = async (req, res) => {
 }
 
 
-exports.Test = async (req, res) => {
-  try {
-
-    const data = await userModel.find()
-
-    res.send({ status: true, msg: "OTP sent successfully", data: data })
-  }
-  catch (e) { res.status(500).send({ status: false, msg: e.message }) }
-
-}
 
 exports.UserUpdated = async (req, res) => {
   try {
@@ -186,21 +176,66 @@ exports.ChangePassword = async (req, res) => {
 
 }
 
-
 exports.updateUserEmail = async (req, res) => {
   try {
-
     const data = req.body;
-    const token = req.headers["x-api-key"];
-    console.log(data)
-    console.log(token)
-    res.status(200).send({ status: true, msg: "Email Change Successfully" })
-    
+    const { email, password } = data;
 
+    if (!email) return res.status(400).send({ status: false, msg: "Email is required" });
+    if (!password) return res.status(400).send({ status: false, msg: "Password is required" });
+
+    const findUser = await userModel.findById(req.params.userId);
+    if (!findUser) return res.status(404).send({ status: false, msg: "User not found" });
+
+    const emailExists = await userModel.findOne({ email: email });
+    if (emailExists) return res.status(400).send({ status: false, msg: "Email already in use" });
+
+    const isPasswordCorrect = await bcrypt.compare(password, findUser.password);
+    if (!isPasswordCorrect) return res.status(401).send({ status: false, msg: "Incorrect password" });
+
+    const randomOtp = Math.floor(1000 + Math.random() * 9000);
+
+    ChangeUserEmail(findUser.name, email, randomOtp); 
+
+    const updatedData =await userModel.findByIdAndUpdate(req.params.userId, { NewEmail: email, NewEmailOtp: randomOtp, newEmailOtpExpires: Date.now() + 300000 }, { new: true });
+    res.status(200).send({ status: true, msg: "Verification email sent", data: { email: email } });
+
+  } catch (e) {
+    console.error("Error in updateUserEmail:", e);
+    res.status(500).send({ status: false, msg: "Internal server error" });
   }
-  catch (e) { res.status(500).send({ status: false, msg: e.message }) }
+};
 
-}
+exports.verifyUserEmail = async (req, res) => {
+  try {
+
+    const id = req.params.userId;
+    const OTP = req.body.otp;
+
+    const user = await userModel.findById(id);
+    
+    if (!user) return res.status(404).send({ status: false, msg: "User not found" });
+
+    if (user.NewEmailOtp !== OTP) return res.status(400).send({ status: false, msg: "Invalid OTP" });
+
+    const now = Date.now();
+    if (now > user.newEmailOtpExpires) return res.status(400).send({ status: false, msg: "OTP has expired" });
+
+    user.email = user.NewEmail;
+    user.NewEmail = null;
+    user.NewEmailOtp = null;
+    user.newEmailOtpExpires = null;
+
+    await user.save();
+
+    res.status(200).send({ status: true, msg: "Email updated successfully" });
+  } catch (e) {
+    console.error("Error in verifyUserEmail:", e);
+    res.status(500).send({ status: false, msg: "Internal server error" });
+  }
+};
+
+
 
 exports.LogInAdmin = async (req, res) => {
   try {

@@ -4,7 +4,6 @@ require('dotenv').config();
 exports.authenticate = (req, res, next) => {
   try {
     const token = req.headers["x-api-key"];
-    console.log(token)
 
     if (!token) return res.status(400).send({ status: false, msg: "Token must be present" });
 
@@ -25,12 +24,14 @@ exports.authorize = (req, res, next) => {
 
     if (!req.user) return res.status(401).send({ status: false, msg: "Unauthorized access" });
 
+    const id = req.user.userId;
+
+    if(!id) return res.status(400).send({ status: false, msg: "provide id" })
 
     const userIdFromToken = req.user.userId;
-    const requestedUserId = req.params.userId;
+    const requestedUserId = id;
 
     if (userIdFromToken === requestedUserId) return next();
-
 
     return res.status(403).send({ status: false, msg: "You are not authorized!" });
   }
