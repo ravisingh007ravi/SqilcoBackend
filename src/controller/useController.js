@@ -1,15 +1,16 @@
 const userModel = require('../Model/userModel')
 const bcrypt = require('bcrypt')
-const { userImageURL } = require('../Image/ImageURL')
+const { uploadToCloudinary } = require('../Image/ImageURL')
 const { verifyOtp, ChangeUserEmail } = require('../Mail/AllMailFormate')
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 exports.createUSer = async (req, res) => {
   try {
-
+  
     const data = req.body;
     const img = req.file;
+    
     const { name, email, password } = data;
     const randomOTP = Math.floor(1000 + Math.random() * 9000);
 
@@ -26,7 +27,7 @@ exports.createUSer = async (req, res) => {
     }
 
     if (img) {
-      const url = await userImageURL(img.path)
+      const url =  await uploadToCloudinary(img.buffer) 
       data.userImg = url;
     }
 
@@ -197,7 +198,7 @@ exports.updateUserEmail = async (req, res) => {
 
     ChangeUserEmail(findUser.name, email, randomOtp); 
 
-    const updatedData =await userModel.findByIdAndUpdate(req.params.userId, { NewEmail: email, NewEmailOtp: randomOtp, newEmailOtpExpires: Date.now() + 300000 }, { new: true });
+    const updatedData =await userModel.findByIdAndUpdate(req.params.userId, { NewEmail: email, NewEmailOtp: randomOtp, newEmailOtpExpires: Date.now() + 1000*60*5 }, { new: true });
     res.status(200).send({ status: true, msg: "Verification email sent", data: { email: email } });
 
   } catch (e) {
